@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"github.com/noah-blockchain/noah-node/cmd/utils"
-	"github.com/noah-blockchain/noah-node/config"
-	"github.com/noah-blockchain/noah-node/log"
+	"github.com/noah-blockchain/noah-go-node/cmd/utils"
+	"github.com/noah-blockchain/noah-go-node/config"
+	"github.com/noah-blockchain/noah-go-node/log"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -26,6 +26,7 @@ var RootCmd = &cobra.Command{
 			panic(err)
 		}
 
+		cfg.ValidatorMode = config.GetEnvAsBool("VALIDATOR_MODE", cfg.ValidatorMode)
 		log.InitLog(cfg)
 	},
 }

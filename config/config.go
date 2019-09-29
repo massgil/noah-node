@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/noah-blockchain/noah-node/cmd/utils"
+	"github.com/noah-blockchain/noah-go-node/cmd/utils"
 	tmConfig "github.com/tendermint/tendermint/config"
 )
 
@@ -41,10 +41,15 @@ var (
 func DefaultConfig() *Config {
 	cfg := defaultConfig()
 
-	cfg.P2P.Seeds = "4B16B87604E26d28b591197b9B0BEDa7537a3ADF@1.testnet.noah-blockchain.com:26656," +
-					"2ea8b0e56F15B502ef4a04248c263d6Eba0C02E2@2.testnet.noah-blockchain.com:26656," +
-					"643a91c1d96e8C2a345592b169D0f06df62F9A81@3.testnet.noah-blockchain.com:26656," +
-					"532EcE703C67A2C9E5050178FfC2331953996D52@4.testnet.noah-blockchain.com:26656"
+	cfg.P2P.Seeds = "eb7acbf988f2183b487c9a1ee69f85050d5aa3a8@1.testnet.noah-blockchain.com:26656," +
+		"a4bbc9c38ec2cb73850109465579ed9e2c445a53@2.testnet.noah-blockchain.com:26656," +
+		"672e70fcbf0284baff0082851826c8aa37a35fb3@3.testnet.noah-blockchain.com:26656," +
+		"5a3eff103ade054d6b90b963c6a5990bed75336c@4.testnet.noah-blockchain.com:26656"
+
+	cfg.P2P.PersistentPeers = "eb7acbf988f2183b487c9a1ee69f85050d5aa3a8@1.testnet.noah-blockchain.com:26656," +
+		"a4bbc9c38ec2cb73850109465579ed9e2c445a53@2.testnet.noah-blockchain.com:26656," +
+		"672e70fcbf0284baff0082851826c8aa37a35fb3@3.testnet.noah-blockchain.com:26656," +
+		"5a3eff103ade054d6b90b963c6a5990bed75336c@4.testnet.noah-blockchain.com:26656"
 
 	cfg.TxIndex = &tmConfig.TxIndexConfig{
 		Indexer:      "kv",
@@ -257,11 +262,11 @@ func DefaultBaseConfig() BaseConfig {
 		ProfListenAddress:       "",
 		FastSync:                true,
 		FilterPeers:             false,
-		DBBackend:               "memdb",
+		DBBackend:               "goleveldb",
 		DBPath:                  "data",
 		GUIListenAddress:        ":3000",
 		APIListenAddress:        "tcp://0.0.0.0:8841",
-		ValidatorMode:           false,
+		ValidatorMode:           true,
 		KeepStateHistory:        false,
 		APISimultaneousRequests: 100,
 		LogPath:                 "stdout",

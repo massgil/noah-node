@@ -1,26 +1,19 @@
 package main
 
 import (
-	cmd2 "github.com/noah-blockchain/noah-node/cmd/noah/cmd"
-	"github.com/noah-blockchain/noah-node/cmd/utils"
-	"github.com/noah-blockchain/noah-node/config"
+	"github.com/noah-blockchain/noah-go-node/cmd/noah/cmd"
+	"github.com/noah-blockchain/noah-go-node/cmd/utils"
+	"github.com/noah-blockchain/noah-go-node/config"
 )
 
 func main() {
-
-	//box := packr.New("myBox", "testnet/noah-testnet-1")
-	//_, err := box.FindString("genesis.json")
-	//if err != nil {
-	//	panic(err)
-	//}
-	//panic(err)
-	rootCmd := cmd2.RootCmd
+	rootCmd := cmd.RootCmd
 
 	rootCmd.AddCommand(
-		cmd2.RunNode,
-		cmd2.ShowNodeId,
-		cmd2.ShowValidator,
-		cmd2.Version,
+		cmd.RunNode,
+		cmd.ShowNodeId,
+		cmd.ShowValidator,
+		cmd.Version,
 	)
 
 	rootCmd.PersistentFlags().StringVar(&utils.NoahHome, "home-dir", "", "base dir (default is $HOME/noah)")

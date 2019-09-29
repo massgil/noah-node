@@ -2,16 +2,17 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/noah-blockchain/noah-node/cmd/utils"
+	"io/ioutil"
 	"time"
 
 	"github.com/gobuffalo/packr"
 	"github.com/noah-blockchain/noah-go-node/api"
+	"github.com/noah-blockchain/noah-go-node/cmd/utils"
+	"github.com/noah-blockchain/noah-go-node/config"
 	"github.com/noah-blockchain/noah-go-node/core/noah"
 	"github.com/noah-blockchain/noah-go-node/eventsdb"
 	"github.com/noah-blockchain/noah-go-node/gui"
-	"github.com/noah-blockchain/noah-node/config"
-	"github.com/noah-blockchain/noah-node/log"
+	"github.com/noah-blockchain/noah-go-node/log"
 	"github.com/spf13/cobra"
 	"github.com/tendermint/tendermint/abci/types"
 	tmCfg "github.com/tendermint/tendermint/config"
@@ -126,15 +127,59 @@ func updateBlocksTimeDelta(app *noah.Blockchain, config *tmCfg.Config) {
 	blockStoreDB.Close()
 }
 
-func startTendermintNode(app types.Application, cfg *tmCfg.Config) *tmNode.Node {
+func getNodeKey() (*p2p.NodeKey, error) {
+	nodeKeyJSON := config.GetEnv("NODE_KEY", "")
+	if len(nodeKeyJSON) > 0 {
+		if err := ioutil.WriteFile(cfg.NodeKeyFile(), []byte(nodeKeyJSON), 0600); err != nil {
+			return nil, err
+		}
+	}
+
 	nodeKey, err := p2p.LoadOrGenNodeKey(cfg.NodeKeyFile())
+	if err != nil {
+		return nil, err
+	}
+
+	return nodeKey, nil
+}
+
+func getValidatorKey() (*privval.FilePV, error) {
+	validatorKeyJSON := config.GetEnv("VALIDATOR_KEY", "")
+	if len(validatorKeyJSON) > 0 {
+		if err := ioutil.WriteFile(cfg.PrivValidatorKeyFile(), []byte(validatorKeyJSON), 0600); err != nil {
+			return nil, err
+		}
+
+		defaultState := "{}"
+		if err := ioutil.WriteFile(cfg.PrivValidatorStateFile(), []byte(defaultState), 0600); err != nil {
+			return nil, err
+		}
+	}
+
+	var pv *privval.FilePV
+	if common.FileExists(cfg.PrivValidatorKeyFile()) {
+		pv = privval.LoadFilePV(cfg.PrivValidatorKeyFile(), cfg.PrivValidatorStateFile())
+	} else {
+		pv = privval.GenFilePV(cfg.PrivValidatorKeyFile(), cfg.PrivValidatorStateFile())
+		pv.Save()
+	}
+	return pv, nil
+}
+
+func startTendermintNode(app types.Application, cfg *tmCfg.Config) *tmNode.Node {
+	nodeKey, err := getNodeKey()
+	if err != nil {
+		panic(err)
+	}
+
+	validatorKey, err := getValidatorKey()
 	if err != nil {
 		panic(err)
 	}
 
 	node, err := tmNode.NewNode(
 		cfg,
-		privval.LoadOrGenFilePV(cfg.PrivValidatorKeyFile(), cfg.PrivValidatorStateFile()),
+		validatorKey,
 		nodeKey,
 		proxy.NewLocalClientCreator(app),
 		getGenesis,
@@ -161,7 +206,7 @@ func getGenesis() (doc *tmTypes.GenesisDoc, e error) {
 
 	if !common.FileExists(genesisFile) {
 		box := packr.NewBox("../../../testnet/")
-		bytes, err := box.MustBytes(config.NetworkId + "/genesis.json")
+		bytes, err := box.Find(config.NetworkId + "/genesis.json")
 		if err != nil {
 			panic(err)
 		}
