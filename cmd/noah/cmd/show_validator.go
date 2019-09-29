@@ -2,8 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/noah-blockchain/noah-node/log"
+	"github.com/noah-blockchain/noah-go-node/log"
 	"github.com/spf13/cobra"
+	"github.com/tendermint/go-amino"
 	"github.com/tendermint/tendermint/crypto/encoding/amino"
 	"github.com/tendermint/tendermint/libs/common"
 	"github.com/tendermint/tendermint/privval"
@@ -25,6 +26,6 @@ func showValidator(cmd *cobra.Command, args []string) error {
 	}
 
 	pv := privval.LoadFilePV(keyFilePath, cfg.PrivValidatorStateFile())
-	fmt.Printf("Mp%x\n", pv.GetPubKey().Bytes()[5:])
+	fmt.Printf("Np%x\n", pv.GetPubKey().Bytes()[5:])
 	return nil
 }
